@@ -95,6 +95,11 @@ H --> I[Instance Info Displayed on Web Page]
 
 
 # 3. Deployment via CLI
+The following steps show how to deploy and manage the virtual machine infrastructure using Google Cloud CLI.
+This process automates project setup, resource creation, and lifecycle management directly from the command line - including creating an instance template with the startup script, deploying a managed instance group (MIG), configuring networking, enabling monitoring, and managing IAM roles.
+
+The commands below can be executed sequentially in Google Cloud Shell or any environment with the gcloud CLI configured and authenticated.
+
 ### 1. Creation of a new GCP project for Group 6
 ```
 gcloud projects create grupa6-deployment \
