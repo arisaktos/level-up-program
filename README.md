@@ -1,2 +1,242 @@
-# level-up-program
-Group project as part of the Women in Tech Level Up Program
+# 1. Project goal
+The goal of this project is to create and manage a Virtual Machine (VM) infrastructure on Google Cloud Platform (GCP) using Google Compute Engine. The project involves automating the VM configuration with a startup script that installs an Nginx web server, generates a simple HTML page displaying instance information, and ensures the service starts automatically.
+
+Additionally, the project includes a full lifecycle of cloud resource management and configuration tasks:
+
+- Creation of a new GCP project for Group 6.
+- Display and link the billing account to the project.
+- Enable required APIs for Compute Engine and related services.
+- Create and verify an instance template with the startup script.
+- Deploy a managed instance group (MIG) based on the template.
+- Verify group creation and test the startup script functionality across instances.
+- Set up firewall rules to allow HTTP traffic.
+- Enable Cloud Monitoring and Logging for performance and activity tracking.
+- Review and manage IAM policies, including assigning and removing roles for specific users.
+- Clean up resources by deleting the Managed Instance Group and Instance Template after testing.
+
+Tools & Technologies:
+- Google Compute Engine
+- IAM
+- Cloud Monitoring
+- Bash
+- Nginx
+- gcloud CLI
+
+# 2. Startup script
+The startup script automates the deployment and configuration of each virtual machine instance. Upon creation, it installs Nginx, retrieves the VM’s hostname, internal IP, and external IP, and generates a dynamic HTML page displaying this information. As a result, every new VM is fully configured, operational, and immediately serves a personalized status page through its Nginx web server.
+
+Startup scrip:
+- Updates the system and installs necessary packages (nginx and curl).
+- Starts and enables the Nginx service so it runs on boot.
+- Collects instance details — hostname, internal IP, and external IP.
+- Generates a custom HTML page showing those details.
+- Makes the page immediately available via the Nginx default web server.
+
+
+```
+#!/bin/bash
+
+# Update the system and install Nginx
+apt update -y
+apt install -y nginx curl
+
+# Enable and start the Nginx service
+systemctl enable nginx
+systemctl start nginx
+chmod -R 755 /var/www/html
+
+# Generate an HTML page with instance information
+HOSTNAME=$(hostname)
+INTERNAL_IP=$(hostname -I | awk '{print $1}')
+EXTERNAL_IP=$(curl -s ifconfig.me || echo "Brak publicznego IP")
+
+# Strona HTML z informacjami o instancji
+cat <<EOF > /var/www/html/index.html
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Serwer: $HOSTNAME</title>
+  <style>
+    body { font-family: Arial; background-color: #f7f7f7; text-align: center; padding-top: 5%; }
+    h1 { color: #333; }
+    table { margin: 0 auto; border-collapse: collapse; background: #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    td, th { padding: 10px 20px; border: 1px solid #ccc; }
+    th { background-color: #f0f0f0; }
+  </style>
+</head>
+<body>
+  <h1>Grupa 6 - Automated VM Deployment with Startup Scripts</h1>
+  <p>Dane tej instancji:</p>
+  <table>
+    <tr><th>Nazwa hosta</th><td>$HOSTNAME</td></tr>
+    <tr><th>Adres wewnętrzny</th><td>$INTERNAL_IP</td></tr>
+    <tr><th>Adres zewnętrzny</th><td>$EXTERNAL_IP</td></tr>
+  </table>
+</body>
+</html>
+EOF
+```
+
+### Startup Script Workflow
+
+```mermaid
+flowchart TD
+
+A[VM Instance Created / Startup Script Triggered] --> B[Enable and Start Nginx Service]
+B --> C[Collect Instance Information]
+C --> D[Hostname, Internal IP, External IP]
+D --> E[Generate Dynamic HTML Page]
+E --> F[Save HTML to /var/www/html/index.html]
+F --> G[Nginx Serves Web Page Automatically]
+G --> H[User Accesses VM's External IP via HTTP]
+H --> I[Instance Info Displayed on Web Page]
+```
+
+
+# 3. Deployment via CLI
+### 1. Creation of a new GCP project for Group 6
+```
+gcloud projects create grupa6-deployment \
+  --name="Grupa 6 Deployment Project" \
+  --set-as-default
+```
+### 2. Link the project to a billing account
+First, list available billing accounts:
+```
+gcloud billing accounts list
+```
+
+### 3. Copy the ACCOUNT_ID from the previous command and paste it below:
+```
+gcloud billing projects link grupa6-deployment \
+  --billing-account=ACCOUNT_ID
+```
+
+### 4. Enable the Compute Engine API
+```
+gcloud services enable compute.googleapis.com
+```
+
+### 5. Upload the startup script file startup-script.sh to CLI
+
+### 6. Create an instance template with the startup script
+```
+gcloud compute instance-templates create instance-template-group6 \
+  --machine-type=e2-micro \
+  --network-interface=network=default,network-tier=PREMIUM \
+  --instance-template-region=us-central1 \
+  --tags=http-server \
+  --metadata-from-file=startup-script=startup-script.sh
+```
+
+### 7. Verify that the instance template was created
+```
+gcloud compute instance-templates list --regions=us-central1
+```
+
+### 8. Create a Managed Instance Group with 4 virtual machines
+```
+gcloud beta compute instance-groups managed create instance-group-1 \
+  --project=projekt-grupowy-grupa-6 \
+  --base-instance-name=instance-group-1 \
+  --template=projects/projekt-grupowy-grupa-6/regions/us-central1/instanceTemplates/instance-template-group6 \
+  --size=4 \
+  --zones=us-central1-c,us-central1-f,us-central1-b
+```
+
+### 9. Check if the instance group was created successfully
+```
+gcloud compute instance-groups managed list
+```
+
+### 10. Create a firewall rule to allow HTTP traffic
+```
+gcloud compute firewall-rules create allow-http \
+  --network=default \
+  --allow=tcp:80 \
+  --target-tags=http-server \
+  --description="Allow incoming HTTP traffic"
+```
+
+### 11. Enable Cloud Monitoring and Logging services
+```
+gcloud services enable monitoring.googleapis.com logging.googleapis.com
+```
+
+### 12. Check startup script logs for each VM instance
+```
+gcloud compute instances get-serial-port-output instance-group-1-wv5t \
+  --zone=us-central1-b
+
+gcloud compute instances get-serial-port-output instance-group-1-q52h \
+  --zone=us-central1-c
+
+gcloud compute instances get-serial-port-output instance-group-1-4rz9 \
+  --zone=us-central1-f
+
+gcloud compute instances get-serial-port-output instance-group-1-jzb6 \
+  --zone=us-central1-f
+```
+
+### 13. Display the current IAM policy for the project
+```
+gcloud projects get-iam-policy projekt-grupowy-grupa-6
+```
+
+### 14. Add IAM role to a user
+```
+gcloud projects add-iam-policy-binding projekt-grupowy-grupa-6 \
+  --member="user:adres@email.com" \
+  --role="roles/editor"
+```
+
+### 15. Remove IAM role from a user
+```
+gcloud projects remove-iam-policy-binding projekt-grupowy-grupa-6 \
+  --member="user:adres@email.com" \
+  --role="roles/editor"
+```
+
+### 16. Optional: Clean up resources created during the project
+```
+gcloud compute instance-groups managed delete instance-group-1 --zone=us-central1-cgcloud compute instance-groups managed delete instance-group-1 \
+  --region=us-central1
+gcloud compute instance-templates delete instance-template-group6 \
+  --region=us-central1
+
+gcloud compute firewall-rules delete allow-http
+```
+
+### Deployment via CLI Workflow
+
+```mermaid
+flowchart TD
+
+A[Create New GCP Project for Group 6] --> B[Link Billing Account to Project]
+B --> C[Enable Compute Engine API]
+C --> D[Upload Startup Script to Cloud Shell or CLI]
+D --> E[Create Instance Template with Startup Script]
+E --> F[Verify Instance Template Creation]
+F --> G[Create Managed Instance Group - MIG]
+G --> H[Check MIG Creation Status]
+H --> I[Create Firewall Rule for HTTP Traffic]
+I --> J[Enable Cloud Monitoring and Logging]
+J --> K[Check Startup Script Logs on Each VM]
+K --> L[View IAM Policy for the Project]
+L --> M[Assign IAM Role to User]
+M --> N[Remove IAM Role from User]
+N --> O[Clean Up Resources: Delete MIG, Template, and Firewall Rule]
+```
+
+# 4. Testing
+Expected results: after deployment, each virtual machine should automatically start the Nginx web server
+and serve a unique HTML page at its external IP address.
+
+### Expected Results
+
+# 5. Authors
+- **Group 6 Members:**
+  - Name 1 
+  - Name 2 
+  - Name 3 
