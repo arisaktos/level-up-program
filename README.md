@@ -242,6 +242,8 @@ and serve a unique HTML page at its external IP address.
 
 # 5. Authors
 - **Group 6 Members:**
-  - Name 1 
-  - Name 2 
-  - Name 3 
+  - @dfbsx
+  - @arisusaktos
+  - Name 3
+  - Name 4
+  - Name 5
