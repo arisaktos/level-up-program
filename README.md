@@ -102,7 +102,7 @@ The commands below can be executed sequentially in Google Cloud Shell or any env
 
 ### 1. Creation of a new GCP project for Group 6
 ```
-gcloud projects create grupa6-deployment \
+gcloud projects create projekt-grupowy-grupa-6 \
   --name="Grupa 6 Deployment Project" \
   --set-as-default
 ```
@@ -114,7 +114,7 @@ gcloud billing accounts list
 
 ### 3. Copy the ACCOUNT_ID from the previous command and paste it below:
 ```
-gcloud billing projects link grupa6-deployment \
+gcloud billing projects link projekt-grupowy-grupa-6 \
   --billing-account=ACCOUNT_ID
 ```
 
@@ -131,7 +131,7 @@ gcloud compute instance-templates create instance-template-group6 \
   --machine-type=e2-micro \
   --network-interface=network=default,network-tier=PREMIUM \
   --instance-template-region=us-central1 \
-  --tags=http-server \
+  --tags=http-server, monitoring \
   --metadata-from-file=startup-script=startup-script.sh
 ```
 
@@ -209,6 +209,16 @@ gcloud compute firewall-rules create allow-icmp \
   --description="Allow ICMP (ping/traceroute) for diagnostics"
 ```
 
+Monitoring.
+```
+gcloud compute firewall-rules create allow-monitoring \
+  --network=default \
+  --allow=tcp:9090,tcp:3000 \
+  --source-ranges=35.199.192.0/19 \
+  --target-tags=monitoring \
+  --description="Allow access to monitoring tools from GCP"
+```
+
 Blocks any traffic not specified in allow rules.
 ```
 gcloud compute firewall-rules create deny-all-ingress \
@@ -261,7 +271,7 @@ gcloud projects remove-iam-policy-binding projekt-grupowy-grupa-6 \
 
 ### 16. Optional: Clean up resources created during the project
 ```
-gcloud compute instance-groups managed delete instance-group-1 --zone=us-central1-cgcloud compute instance-groups managed delete instance-group-1 \
+gcloud compute instance-groups managed delete instance-group-1 --zone=us-central1-c gcloud compute instance-groups managed delete instance-group-1 \
   --region=us-central1
 gcloud compute instance-templates delete instance-template-group6 \
   --region=us-central1
