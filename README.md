@@ -131,7 +131,7 @@ gcloud compute instance-templates create instance-template-group6 \
   --machine-type=e2-micro \
   --network-interface=network=default,network-tier=PREMIUM \
   --instance-template-region=us-central1 \
-  --tags=http-server, monitoring \
+  --tags=http-server,monitoring \
   --metadata-from-file=startup-script=startup-script.sh
 ```
 
@@ -197,7 +197,7 @@ Allows incoming SSH traffic (port 22) so administrators can securely connect to 
 gcloud compute firewall-rules create allow-ssh \
   --network=default \
   --allow=tcp:22 \
-  --target-tags=ssh-access \
+  --target-tags=http-server \
   --description="Allow SSH access for admin/debug"
 ```
 
