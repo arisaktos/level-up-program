@@ -135,12 +135,12 @@ gcloud compute instance-templates create instance-template-group6 \
   --metadata-from-file=startup-script=startup-script.sh
 ```
 
-### 7. Verify that the instance template was created
+### 6a. Verify that the instance template was created
 ```
 gcloud compute instance-templates list --regions=us-central1
 ```
 
-### 8. Create a Managed Instance Group with 4 virtual machines
+### 7. Create a Managed Instance Group with 4 virtual machines
 ```
 gcloud beta compute instance-groups managed create instance-group-1 \
   --project=projekt-grupowy-grupa-6 \
@@ -150,18 +150,74 @@ gcloud beta compute instance-groups managed create instance-group-1 \
   --zones=us-central1-c,us-central1-f,us-central1-b
 ```
 
-### 9. Check if the instance group was created successfully
+### 7a. Check if the instance group was created successfully
 ```
 gcloud compute instance-groups managed list
 ```
 
+### 8. Create Health Check
+```
+gcloud compute health-checks create http global-http-health-check \
+    --port=80
+```
+
+### 8a. Verify if Health Check was created successfully
+```
+gcloud compute health-checks list
+gcloud compute health-checks describe global-http-health-check
+```
+
+### 9. Create Load Balancer
+```
+...
+```
+
 ### 10. Create a firewall rule to allow HTTP traffic
+
+Allows incoming HTTP traffic (port 80) so external users can access the web application hosted on the VM or instance group.
 ```
 gcloud compute firewall-rules create allow-http \
   --network=default \
   --allow=tcp:80 \
   --target-tags=http-server \
   --description="Allow incoming HTTP traffic"
+```
+
+Allows incoming HTTPS traffic (port 443) so users can securely access the web application over an encrypted connection.
+```
+gcloud compute firewall-rules create allow-https \
+  --network=default \
+  --allow=tcp:443 \
+  --target-tags=http-server \
+  --description="Allow incoming HTTPS traffic"
+```
+
+Allows incoming SSH traffic (port 22) so administrators can securely connect to the virtual machine for maintenance and troubleshooting.
+```
+gcloud compute firewall-rules create allow-ssh \
+  --network=default \
+  --allow=tcp:22 \
+  --target-tags=ssh-access \
+  --description="Allow SSH access for admin/debug"
+```
+
+Allows incoming ICMP traffic so network tools like ping and traceroute can verify connectivity and diagnose network issues.
+```
+gcloud compute firewall-rules create allow-icmp \
+  --network=default \
+  --allow=icmp \
+  --description="Allow ICMP (ping/traceroute) for diagnostics"
+```
+
+Blocks any traffic not specified in allow rules.
+```
+gcloud compute firewall-rules create deny-all-ingress \
+  --network=default \
+  --direction=INGRESS \
+  --priority=65535 \
+  --action=DENY \
+  --rules=all \
+  --description="Deny all other ingress traffic for security"
 ```
 
 ### 11. Enable Cloud Monitoring and Logging services
@@ -244,6 +300,6 @@ and serve a unique HTML page at its external IP address.
 - **Group 6 Members:**
   - [@dfbsx](https://github.com/dfbsx)
   - [@arisusaktos](https://github.com/arisaktos)
-  - Name 3
-  - Name 4
-  - Name 5
+  - MW
+  - DF
+  - JD
