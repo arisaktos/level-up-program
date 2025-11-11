@@ -349,19 +349,25 @@ N --> O[Clean Up Resources: Delete MIG, Template, and Firewall Rule]
 
 ### Test Case 1 - Create a new project
 Step 1: Use create project command
+
 ![Alt text](/images/Test-case-1a.jpg)
+
 Since the project ID works exactly the same way as a login name, we need to choose a different PROJECT_ID.
 
 Step 2 Run command again, with unique project_id
+
 ![Alt text](/images/Test-case-1b.jpg)
 
 Success / conclusion:
+
 ![Alt text](/images/Test-case-1c.jpg)
 
 Should be changed to:
+
 ![Alt text](/images/Test-case-1d.jpg)
 
 Step 3 Verify the project was created and is set as default
+
 ![Alt text](/images/Test-case-1e.jpg)
 
 Status: PASSED
@@ -369,12 +375,15 @@ Status: PASSED
 ### Test Case 2 - Connect with billing account
 
 Step 1 List available billing accounts
+
 ![Alt text](/images/Test-case-2a.jpg)
 
 Step 2 Connect the project with selected billing account
+
 ![Alt text](/images/Test-case-2b.jpg)
 
 Step 3 Check that billing is enabled
+
 ![Alt text](/images/Test-case-2c.jpg)
 
 The output shows “billingEnabled”: true
@@ -383,10 +392,13 @@ Status: PASSED
 ### Test Case 3 - Enable the Compute Engine API
 
 Step 1 Enable the Compute Engine API using the following command
+
 ![Alt text](/images/Test-case-3a.jpg)
 
 Step 2 Verify that the API is enabled
+
 ![Alt text](/images/Test-case-3b.jpg)
+
 ![Alt text](/images/Test-case-3c.jpg)
 
 The Compute Engine API (compute.googleapis.com) appears on the list of enabled services.
@@ -397,12 +409,15 @@ Status: PASSED
 Verify that deleting an instance from a Managed Instance Group (MIG) triggers automatic recreation of the instance by the group’s autoscaling and health management mechanisms.
 
 Step 1 List existing instances in the MIG
+
 ![Alt text](/images/Test-case-4a.jpg)
 
 Step 2 Delete one instance from the group
+
 ![Alt text](/images/Test-case-4b.jpg)
 
 Step 3 Verify automatic recreation
+
 ![Alt text](/images/Test-case-4c.jpg)
 
 MIG automatically created new instance (action: creating)
@@ -413,21 +428,27 @@ Status: PASSED
 Verify how a MIG behaves when instances are recreated using a template with broken startup script, check health
 
 Step 1 Modify startup script
+
 ![Alt text](/images/Test-case-5a.jpg)
 
 Step 2 Create a new template based on broken script
+
 ![Alt text](/images/Test-case-5b.jpg)
 
 Step 3 Set broken template as current MIG template
+
 ![Alt text](/images/Test-case-5c.jpg)
 
 Step 4 Recreate instances in the MIG
+
 ![Alt text](/images/Test-case-5e.jpg)
 
 Step 5 Verify that recreated instances use broken template
+
 ![Alt text](/images/Test-case-5f.jpg)
 
 Step 6 Verify MIG action
+
 ![Alt text](/images/Test-case-5h.jpg)
 ![Alt text](/images/Test-case-5i.jpg)
 
@@ -439,21 +460,27 @@ Status: PASSED / Need Observation
 Verify behaviour when the allow-http rule is deleted
 
 Step 1 Verify if allow-http rule exists
+
 ![Alt text](/images/Test-case-6a.jpg)
 
 Step 2 Delete this rule
+
 ![Alt text](/images/Test-case-6b.jpg)
 
 Step 3 Check external IP of instances
+
 ![Alt text](/images/Test-case-6c.jpg)
 
 Step 4 Test http access using curl, connection fails
+
 ![Alt text](/images/Test-case-6d.jpg)
 
 Step 5 Recreate allow-http firewall rule
+
 ![Alt text](/images/Test-case-6e.jpg)
 
 Step 6 Test http access again, connection succeeds, traffic restored
+
 ![Alt text](/images/Test-case-6f.jpg)
 
 Status: PASSED
