@@ -168,11 +168,56 @@ gcloud compute health-checks describe global-http-health-check
 ```
 
 ### 9. Create Load Balancer
+
+Create a backend service and attach the health check
 ```
-...
+gcloud compute backend-services create backend-service-group6 \
+  --protocol=HTTP \
+  --health-checks=global-http-health-check \
+  --global
 ```
 
-### 10. Create a firewall rule to allow HTTP traffic
+Add your managed instance group as a backend
+```
+gcloud compute backend-services add-backend backend-service-group6 \
+  --instance-group=instance-group-1 \
+  --instance-group-region=us-central1 \
+  --global
+```
+
+Create a URL map to route requests to the backend service
+```
+gcloud compute url-maps create url-map-group6 \
+  --default-service=backend-service-group6
+```
+
+Create a target HTTP proxy
+```
+gcloud compute target-http-proxies create http-proxy-group6 \
+  --url-map=url-map-group6
+```
+
+Create a forwarding rule to assign external IP
+```
+gcloud compute forwarding-rules create http-forwarding-rule-group6 \
+  --global \
+  --target-http-proxy=http-proxy-group6 \
+  --ports=80
+```
+
+### 10. Verify the load balancer configuration
+
+Check backend service status
+```
+gcloud compute backend-services describe backend-service-group6 --global
+```
+
+Check backend health
+```
+gcloud compute backend-services get-health backend-service-group6 --global
+```
+
+### 11. Create a firewall rule to allow HTTP traffic
 
 Allows incoming HTTP traffic (port 80) so external users can access the web application hosted on the VM or instance group.
 ```
@@ -230,12 +275,12 @@ gcloud compute firewall-rules create deny-all-ingress \
   --description="Deny all other ingress traffic for security"
 ```
 
-### 11. Enable Cloud Monitoring and Logging services
+### 12. Enable Cloud Monitoring and Logging services
 ```
 gcloud services enable monitoring.googleapis.com logging.googleapis.com
 ```
 
-### 12. Check startup script logs for each VM instance
+### 13. Check startup script logs for each VM instance
 ```
 gcloud compute instances get-serial-port-output instance-group-1-wv5t \
   --zone=us-central1-b
@@ -250,26 +295,26 @@ gcloud compute instances get-serial-port-output instance-group-1-jzb6 \
   --zone=us-central1-f
 ```
 
-### 13. Display the current IAM policy for the project
+### 14. Display the current IAM policy for the project
 ```
 gcloud projects get-iam-policy projekt-grupowy-grupa-6
 ```
 
-### 14. Add IAM role to a user
+### 15. Add IAM role to a user
 ```
 gcloud projects add-iam-policy-binding projekt-grupowy-grupa-6 \
   --member="user:adres@email.com" \
   --role="roles/editor"
 ```
 
-### 15. Remove IAM role from a user
+### 16. Remove IAM role from a user
 ```
 gcloud projects remove-iam-policy-binding projekt-grupowy-grupa-6 \
   --member="user:adres@email.com" \
   --role="roles/editor"
 ```
 
-### 16. Optional: Clean up resources created during the project
+### 17. Optional: Clean up resources created during the project
 ```
 gcloud compute instance-groups managed delete instance-group-1 --zone=us-central1-c gcloud compute instance-groups managed delete instance-group-1 \
   --region=us-central1
