@@ -444,10 +444,13 @@ Step 4 Recreate instances in the MIG
 ![Alt text](/images/Test-case-5e.jpg)
 
 Step 5 Verify that recreated instances use broken template
+```
+gcloud compute backend-services get-health backend-service-group6 --global
+```
 
 ![Alt text](/images/Test-case-5f.jpg)
 
-Step 6 Verify MIG action
+Step 6 Monitor health check status (using existing health check) 
 
 ![Alt text](/images/Test-case-5h.jpg)
 ![Alt text](/images/Test-case-5i.jpg)
