@@ -324,27 +324,6 @@ gcloud compute instance-templates delete instance-template-group6 \
 gcloud compute firewall-rules delete allow-http
 ```
 
-### Deployment via CLI Workflow
-
-```mermaid
-flowchart TD
-
-A[Create New GCP Project for Group 6] --> B[Link Billing Account to Project]
-B --> C[Enable Compute Engine API]
-C --> D[Upload Startup Script to Cloud Shell or CLI]
-D --> E[Create Instance Template with Startup Script]
-E --> F[Verify Instance Template Creation]
-F --> G[Create Managed Instance Group - MIG]
-G --> H[Check MIG Creation Status]
-H --> I[Create Firewall Rule for HTTP Traffic]
-I --> J[Enable Cloud Monitoring and Logging]
-J --> K[Check Startup Script Logs on Each VM]
-K --> L[View IAM Policy for the Project]
-L --> M[Assign IAM Role to User]
-M --> N[Remove IAM Role from User]
-N --> O[Clean Up Resources: Delete MIG, Template, and Firewall Rule]
-```
-
 # 4. Testing
 
 ### Test Case 1 - Create a new project
