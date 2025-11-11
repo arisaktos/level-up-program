@@ -346,10 +346,10 @@ N --> O[Clean Up Resources: Delete MIG, Template, and Firewall Rule]
 ```
 
 # 4. Testing
-Expected results: after deployment, each virtual machine should automatically start the Nginx web server
-and serve a unique HTML page at its external IP address.
 
-### Expected Results
+###Test Case 1 - Create a new project
+Step 1: Use create project command
+
 
 # 5. Authors
 - **Group 6 Members:**
