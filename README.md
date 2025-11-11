@@ -347,8 +347,38 @@ N --> O[Clean Up Resources: Delete MIG, Template, and Firewall Rule]
 
 # 4. Testing
 
-###Test Case 1 - Create a new project
+### Test Case 1 - Create a new project
 Step 1: Use create project command
+![Alt text](/images/Test-case-1a.jpg)
+Since the project ID works exactly the same way as a login name, we need to choose a different PROJECT_ID.
+
+Step 2 Run command again, with unique project_id
+![Alt text](/images/Test-case-1b.jpg)
+
+Success / conclusion:
+![Alt text](/images/Test-case-1c.jpg)
+
+Should be changed to:
+![Alt text](/images/Test-case-1d.jpg)
+
+Step 3 Verify the project was created and is set as default
+![Alt text](/images/Test-case-1e.jpg)
+
+Status: PASSED
+
+### Test Case 2 - Connect with billing account
+
+Step 1 List available billing accounts
+![Alt text](/images/Test-case-2a.jpg)
+
+Step 2 Connect the project with selected billing account
+![Alt text](/images/Test-case-2b.jpg)
+
+Step 3 Check that billing is enabled
+![Alt text](/images/Test-case-2c.jpg)
+
+The output shows “billingEnabled”: true
+Status: PASSED
 
 
 # 5. Authors
