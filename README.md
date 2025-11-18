@@ -143,11 +143,11 @@ gcloud compute instance-templates list --regions=us-central1
 ### 7. Create Health Check
 ```
 gcloud compute health-checks create http global-http-health-check \
-    --port=80
-       --check-interval=10 \
-   --timeout=5 \
-   --unhealthy-threshold=3 \
-   --healthy-threshold=2
+    --port=80 \
+    --check-interval=10 \
+    --timeout=5 \
+    --unhealthy-threshold=3 \
+    --healthy-threshold=2
 ```
 
 ### 7a. Verify if Health Check was created successfully
