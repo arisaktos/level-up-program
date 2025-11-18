@@ -539,5 +539,5 @@ Status: PASSED
   - [@dfbsx](https://github.com/dfbsx)
   - [@arisusaktos](https://github.com/arisaktos)
   - [@Magdalena-N](https://github.com/Magdalena-N)
+  - [@jusdry](https://github.com/jusdry)
   - DF
-  - JD
