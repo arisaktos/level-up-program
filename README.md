@@ -25,7 +25,7 @@ Tools & Technologies:
 # 2. Startup script
 The startup script automates the deployment and configuration of each virtual machine instance. Upon creation, it installs Nginx, retrieves the VM’s hostname, internal IP, and external IP, and generates a dynamic HTML page displaying this information. As a result, every new VM is fully configured, operational, and immediately serves a personalized status page through its Nginx web server.
 
-Startup scrip:
+Startup script:
 - Updates the system and installs necessary packages (nginx and curl).
 - Starts and enables the Nginx service so it runs on boot.
 - Collects instance details — hostname, internal IP, and external IP.
@@ -103,8 +103,8 @@ The commands below can be executed sequentially in Google Cloud Shell or any env
 ### 1. Creation of a new GCP project for Group 6
 ```
 gcloud projects create projekt-grupowy-grupa-6 \
-  --name="Grupa 6 Deployment Project" \
-  --set-as-default
+--name="Grupa 6 Deployment Project" \
+--set-as-default
 ```
 ### 2. Link the project to a billing account
 First, list available billing accounts:
@@ -115,7 +115,7 @@ gcloud billing accounts list
 ### 3. Copy the ACCOUNT_ID from the previous command and paste it below:
 ```
 gcloud billing projects link projekt-grupowy-grupa-6 \
-  --billing-account=ACCOUNT_ID
+--billing-account=ACCOUNT_ID
 ```
 
 ### 4. Enable the Compute Engine API
@@ -128,11 +128,11 @@ gcloud services enable compute.googleapis.com
 ### 6. Create an instance template with the startup script
 ```
 gcloud compute instance-templates create instance-template-group6 \
-  --machine-type=e2-micro \
-  --network-interface=network=default,network-tier=PREMIUM \
-  --instance-template-region=us-central1 \
-  --tags=http-server,monitoring \
-  --metadata-from-file=startup-script=startup-script.sh
+--machine-type=e2-micro \
+--network-interface=network=default,network-tier=PREMIUM \
+--instance-template-region=us-central1 \
+--tags=http-server,monitoring \
+--metadata-from-file=startup-script=startup-script.sh
 ```
 
 ### 6a. Verify that the instance template was created
@@ -143,27 +143,27 @@ gcloud compute instance-templates list --regions=us-central1
 ### 7. Create Health Check
 ```
 gcloud compute health-checks create http global-http-health-check \
-    --port=80 \
-    --check-interval=10 \
-    --timeout=5 \
-    --unhealthy-threshold=3 \
-    --healthy-threshold=2
+--port=80 \
+--check-interval=10 \
+--timeout=5 \
+--unhealthy-threshold=3 \
+--healthy-threshold=2
 ```
 
 ### 7a. Verify if Health Check was created successfully
 ```
 gcloud compute health-checks list
-gcloud compute health-checks describe global-http-health-check
+gcloud compute health-checks describe global-http-health-check 
 ```
 ### 8. Create a Managed Instance Group with 4 virtual machines
 ```
 gcloud beta compute instance-groups managed create instance-group-1 \
-  --project=projekt-grupowy-grupa-6 \
-  --base-instance-name=instance-group-1 \
-  --template=projects/projekt-grupowy-grupa-6/regions/us-central1/instanceTemplates/instance-template-group6 \
-  --size=4 \
-  --zones=us-central1-c,us-central1-f,us-central1-b
-  --health-check=projects/projekt-grupowy-grupa-6/regions/us-central1/healthChecks/global-http-health-check
+--project=projekt-grupowy-grupa-6 \
+--base-instance-name=instance-group-1 \
+--template=projects/projekt-grupowy-grupa-6/regions/us-central1/instanceTemplates/instance-template-group6 \
+--size=4 \
+--zones=us-central1-c,us-central1-f,us-central1-b \
+--health-check=global-http-health-check
 ```
 
 ### 8a. Check if the instance group was created successfully
@@ -176,37 +176,37 @@ gcloud compute instance-groups managed list
 Create a backend service and attach the health check
 ```
 gcloud compute backend-services create backend-service-group6 \
-  --protocol=HTTP \
-  --health-checks=global-http-health-check \
-  --global
+--protocol=HTTP \
+--health-checks=global-http-health-check \
+--global
 ```
 
 Add your managed instance group as a backend
 ```
 gcloud compute backend-services add-backend backend-service-group6 \
-  --instance-group=instance-group-1 \
-  --instance-group-region=us-central1 \
-  --global
+--instance-group=instance-group-1 \
+--instance-group-region=us-central1 \
+--global
 ```
 
 Create a URL map to route requests to the backend service
 ```
 gcloud compute url-maps create url-map-group6 \
-  --default-service=backend-service-group6
+--default-service=backend-service-group6
 ```
 
 Create a target HTTP proxy
 ```
 gcloud compute target-http-proxies create http-proxy-group6 \
-  --url-map=url-map-group6
+--url-map=url-map-group6
 ```
 
 Create a forwarding rule to assign external IP
 ```
 gcloud compute forwarding-rules create http-forwarding-rule-group6 \
-  --global \
-  --target-http-proxy=http-proxy-group6 \
-  --ports=80
+--global \
+--target-http-proxy=http-proxy-group6 \
+--ports=80
 ```
 
 ### 10. Verify the load balancer configuration
@@ -226,57 +226,57 @@ gcloud compute backend-services get-health backend-service-group6 --global
 Allows incoming HTTP traffic (port 80) so external users can access the web application hosted on the VM or instance group.
 ```
 gcloud compute firewall-rules create allow-http \
-  --network=default \
-  --allow=tcp:80 \
-  --target-tags=http-server \
-  --description="Allow incoming HTTP traffic"
+--network=default \
+--allow=tcp:80 \
+--target-tags=http-server \
+--description="Allow incoming HTTP traffic"
 ```
 
 Allows incoming HTTPS traffic (port 443) so users can securely access the web application over an encrypted connection.
 ```
 gcloud compute firewall-rules create allow-https \
-  --network=default \
-  --allow=tcp:443 \
-  --target-tags=http-server \
-  --description="Allow incoming HTTPS traffic"
+--network=default \
+--allow=tcp:443 \
+--target-tags=http-server \
+--description="Allow incoming HTTPS traffic"
 ```
 
 Allows incoming SSH traffic (port 22) so administrators can securely connect to the virtual machine for maintenance and troubleshooting.
 ```
 gcloud compute firewall-rules create allow-ssh \
-  --network=default \
-  --allow=tcp:22 \
-  --target-tags=http-server \
-  --description="Allow SSH access for admin/debug"
+--network=default \
+--allow=tcp:22 \
+--target-tags=http-server \
+--description="Allow SSH access for admin/debug"
 ```
 
 Allows incoming ICMP traffic so network tools like ping and traceroute can verify connectivity and diagnose network issues.
 ```
 gcloud compute firewall-rules create allow-icmp \
-  --network=default \
-  --allow=icmp \
-  --description="Allow ICMP (ping/traceroute) for diagnostics"
+--network=default \
+--allow=icmp \
+--description="Allow ICMP (ping/traceroute) for diagnostics"
 ```
 
 Monitoring.
 ```
 gcloud compute firewall-rules create allow-monitoring \
-  --network=default \
-  --allow=tcp:9090,tcp:3000 \
-  --source-ranges=35.199.192.0/19 \
-  --target-tags=monitoring \
-  --description="Allow access to monitoring tools from GCP"
+--network=default \
+--allow=tcp:9090,tcp:3000 \
+--source-ranges=35.199.192.0/19 \
+--target-tags=monitoring \
+--description="Allow access to monitoring tools from GCP"
 ```
 
 Blocks any traffic not specified in allow rules.
 ```
 gcloud compute firewall-rules create deny-all-ingress \
-  --network=default \
-  --direction=INGRESS \
-  --priority=65535 \
-  --action=DENY \
-  --rules=all \
-  --description="Deny all other ingress traffic for security"
+--network=default \
+--direction=INGRESS \
+--priority=65535 \
+--action=DENY \
+--rules=all \
+--description="Deny all other ingress traffic for security"
 ```
 
 ### 12. Enable Cloud Monitoring and Logging services
@@ -287,16 +287,16 @@ gcloud services enable monitoring.googleapis.com logging.googleapis.com
 ### 13. Check startup script logs for each VM instance
 ```
 gcloud compute instances get-serial-port-output instance-group-1-wv5t \
-  --zone=us-central1-b
+--zone=us-central1-b
 
 gcloud compute instances get-serial-port-output instance-group-1-q52h \
-  --zone=us-central1-c
+--zone=us-central1-c
 
 gcloud compute instances get-serial-port-output instance-group-1-4rz9 \
-  --zone=us-central1-f
+--zone=us-central1-f
 
 gcloud compute instances get-serial-port-output instance-group-1-jzb6 \
-  --zone=us-central1-f
+--zone=us-central1-f
 ```
 
 ### 14. Display the current IAM policy for the project
@@ -307,25 +307,43 @@ gcloud projects get-iam-policy projekt-grupowy-grupa-6
 ### 15. Add IAM role to a user
 ```
 gcloud projects add-iam-policy-binding projekt-grupowy-grupa-6 \
-  --member="user:adres@email.com" \
-  --role="roles/editor"
+--member="user:adres@email.com" \
+--role="roles/editor"
 ```
 
 ### 16. Remove IAM role from a user
 ```
 gcloud projects remove-iam-policy-binding projekt-grupowy-grupa-6 \
-  --member="user:adres@email.com" \
-  --role="roles/editor"
+--member="user:adres@email.com" \
+--role="roles/editor"
 ```
 
 ### 17. Optional: Clean up resources created during the project
 ```
-gcloud compute instance-groups managed delete instance-group-1 --zone=us-central1-c gcloud compute instance-groups managed delete instance-group-1 \
-  --region=us-central1
-gcloud compute instance-templates delete instance-template-group6 \
-  --region=us-central1
+# Delete the Managed Instance Group
+gcloud compute instance-groups managed delete instance-group-1 \
+--region=us-central1
 
+# Delete the Instance Template
+gcloud compute instance-templates delete instance-template-group6 \
+--region=us-central1
+
+# Delete firewall rules
 gcloud compute firewall-rules delete allow-http
+gcloud compute firewall-rules delete allow-https
+gcloud compute firewall-rules delete allow-ssh
+gcloud compute firewall-rules delete allow-icmp
+gcloud compute firewall-rules delete allow-monitoring
+gcloud compute firewall-rules delete deny-all-ingress
+
+# Delete load balancer components
+gcloud compute forwarding-rules delete http-forwarding-rule-group6 --global
+gcloud compute target-http-proxies delete http-proxy-group6
+gcloud compute url-maps delete url-map-group6
+gcloud compute backend-services delete backend-service-group6 --global
+
+# Delete health check
+gcloud compute health-checks delete global-http-health-check
 ```
 
 # 4. Testing
