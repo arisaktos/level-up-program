@@ -140,7 +140,22 @@ gcloud compute instance-templates create instance-template-group6 \
 gcloud compute instance-templates list --regions=us-central1
 ```
 
-### 7. Create a Managed Instance Group with 4 virtual machines
+### 7. Create Health Check
+```
+gcloud compute health-checks create http global-http-health-check \
+    --port=80 \
+    --check-interval=10 \
+    --timeout=5 \
+    --unhealthy-threshold=3 \
+    --healthy-threshold=2
+```
+
+### 7a. Verify if Health Check was created successfully
+```
+gcloud compute health-checks list
+gcloud compute health-checks describe global-http-health-check
+```
+### 8. Create a Managed Instance Group with 4 virtual machines
 ```
 gcloud beta compute instance-groups managed create instance-group-1 \
   --project=projekt-grupowy-grupa-6 \
@@ -148,23 +163,12 @@ gcloud beta compute instance-groups managed create instance-group-1 \
   --template=projects/projekt-grupowy-grupa-6/regions/us-central1/instanceTemplates/instance-template-group6 \
   --size=4 \
   --zones=us-central1-c,us-central1-f,us-central1-b
+  --health-check=projects/projekt-grupowy-grupa-6/regions/us-central1/healthChecks/global-http-health-check
 ```
 
-### 7a. Check if the instance group was created successfully
+### 8a. Check if the instance group was created successfully
 ```
 gcloud compute instance-groups managed list
-```
-
-### 8. Create Health Check
-```
-gcloud compute health-checks create http global-http-health-check \
-    --port=80
-```
-
-### 8a. Verify if Health Check was created successfully
-```
-gcloud compute health-checks list
-gcloud compute health-checks describe global-http-health-check
 ```
 
 ### 9. Create Load Balancer
@@ -467,10 +471,55 @@ Step 6 Test http access again, connection succeeds, traffic restored
 
 Status: PASSED
 
+### Test Case 7 - LB routes traffic to different VMs
+
+Verify behaviour when pinging LB IP address constantly
+
+Step 1 Generate traffic to LB IP address
+
+![Alt text](/images/Test-case-7a.jpg)
+
+Step 2 Verify if traffic is being load balanced across multiple VM instances.
+
+![Alt text](/images/Test-case-7b.jpg)
+
+
+Status: PASSED
+
+### Test Case 8 - Autohealing works
+
+Verify behaviour when health check detects unhealthy vm instance
+
+Step 1 Connect to one of the VM instances in the MIG
+
+![Alt text](/images/Test-case-8a.jpg)
+
+Step 2 Simulate application failure by turning off nginx
+
+![Alt text](/images/Test-case-8b.jpg)
+
+Step 3 Verify connection using external IP address of selected instance
+
+![Alt text](/images/Test-case-8c.jpg)
+
+Step 4 Verify that health status is unhealthy of one instance in backend service
+
+![Alt text](/images/Test-case-8d.jpg)
+
+Step 5 Verify that after some time VM instance is removed
+
+![Alt text](/images/Test-case-8e.jpg)
+
+Step 6 Verify that the unhealthy VM instance was automatically recreated using the original instance template.
+
+![Alt text](/images/Test-case-8f.jpg)
+
+Status: PASSED
+
 # 5. Authors
 - **Group 6 Members:**
   - [@dfbsx](https://github.com/dfbsx)
   - [@arisusaktos](https://github.com/arisaktos)
-  - MW
+  - [@Magdalena-N](https://github.com/Magdalena-N)
   - DF
   - JD
